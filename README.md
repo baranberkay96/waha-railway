@@ -55,7 +55,7 @@ Set a webhook per session in the dashboard or with `WHATSAPP_HOOK_URL` for all s
 
 **Engines and resources**
 
-`WHATSAPP_DEFAULT_ENGINE` selects the engine for new sessions: GOWS (default, Go, lightweight), NOWEB (Node.js) or WEBJS (a Chromium per session). Measured on Railway: WAHA about RAM_WAHA idle and RAM_SESSION with a GOWS session waiting for its QR scan, Postgres about RAM_PG, Redis about RAM_REDIS. It fits the Trial plan (1 GB per service); WEBJS needs roughly 300-500 MB per session more.
+`WHATSAPP_DEFAULT_ENGINE` selects the engine for new sessions: GOWS (default, Go, lightweight), NOWEB (Node.js) or WEBJS (a Chromium per session). Measured on Railway without an active WhatsApp session: WAHA 0.28 GB, Postgres 0.12 GB and Redis 0.02 GB idle. Session memory depends on the selected engine; QR pairing was not exercised in this release check. It fits the Trial plan (1 GB per service); WEBJS needs roughly 300-500 MB per session more.
 
 **Scaling and upgrades**
 

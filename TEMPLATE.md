@@ -49,7 +49,7 @@ WAHA (repo build, public domain 3000, volume `/app/data` for media and the local
 
 ## Resource profile
 
-Measured values in the round-12 report. Estimate: WAHA RAM_WAHA idle (GOWS), +30-80 MB per GOWS session, +300-500 MB per WEBJS session; Postgres ~60-120 MB; Redis ~10-30 MB. About $4-8/month idle. Minimum plan: Trial.
+Measured values in the round-12 report. Estimate: WAHA 0.28 GB idle (GOWS, no session), +30-80 MB per GOWS session, +300-500 MB per WEBJS session; Postgres ~60-120 MB; Redis ~10-30 MB. About $4-8/month idle. Minimum plan: Trial.
 
 ## Verification checklist
 
