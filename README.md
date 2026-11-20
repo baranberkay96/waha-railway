@@ -1,5 +1,7 @@
 # Deploy and Host WAHA with Railway
 
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/deploy/waha-202610-whatsapp-http-api-postgres-r?referralCode=20H68q)
+
 WAHA (WhatsApp HTTP API) is a self-hosted REST API for WhatsApp: link a number by QR code, then send and receive messages, media, groups, contacts and status updates over HTTP, with webhooks for incoming events. This template runs WAHA 2026.10.1 with Postgres session storage, Redis for its apps, the dashboard and Swagger UI, all behind generated credentials.
 
 > This template runs WAHA by devlike.pro (Apache-2.0). It is a community template, not affiliated with devlike.pro, Meta or WhatsApp.
