@@ -47,6 +47,16 @@ case "${WAHA_API_KEY:-}" in
   sha512:*) [[ "$WAHA_API_KEY" =~ ^sha512:[0-9a-f]{128}$ ]] || secret_var WAHA_API_KEY 999 "API" ;;
   *) secret_var WAHA_API_KEY 16 "API" ;;
 esac
+# WAHA apps call the API themselves and need the plain key (the image's entrypoint
+# replaces WAHA_API_KEY with its sha512 hash). A key given as a hash cannot serve them.
+if [[ "$WAHA_API_KEY" == sha512:* ]]; then
+  if [ "$(bool_word "${WAHA_APPS_ENABLED:-}" False)" = True ]; then
+    log "WARNING: WAHA_API_KEY is given as a sha512 hash, so WAHA apps (Chatwoot, MCP) cannot call the API; apps are turned off."
+  fi
+  export WAHA_APPS_ENABLED=False
+else
+  export WAHA_API_KEY_PLAIN="$WAHA_API_KEY"
+fi
 user_var WAHA_DASHBOARD_USERNAME
 secret_var WAHA_DASHBOARD_PASSWORD 12 "dashboard"
 user_var WHATSAPP_SWAGGER_USERNAME
