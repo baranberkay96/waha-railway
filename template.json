@@ -1,0 +1,289 @@
+{
+  "name": "WAHA 2026.10 WhatsApp HTTP API (Postgres + Redis)",
+  "description": "Self-hosted WhatsApp REST API with dashboard, Swagger and API-key auth.",
+  "category": "Automation",
+  "tags": [
+    "waha",
+    "whatsapp",
+    "whatsapp-api",
+    "whatsapp-http-api",
+    "chatbot",
+    "n8n",
+    "chatwoot",
+    "webhooks",
+    "messaging"
+  ],
+  "image": "https://cdn.jsdelivr.net/gh/devlikeapro/waha@2026.10.1/logo.png",
+  "upstream": {
+    "waha": "devlikeapro/waha 2026.10.1 (released 2026-10-28, latest stable), image devlikeapro/waha:latest-2026.10.1@sha256:2fc1787ddbd343ed2e7d59482846d1b22aa5ca134e29aa8d42d0e88c54e24779",
+    "postgres": "ghcr.io/railwayapp-templates/postgres-ssl:18",
+    "redis": "redis:8.2.11@sha256:b0b01167ff47bc3868e56a967895a26be4230891a1f42a78ab61cdd227accc8d",
+    "checked": "2026-11-20"
+  },
+  "services": {
+    "WAHA": {
+      "icon": "https://cdn.jsdelivr.net/gh/devlikeapro/waha@2026.10.1/logo.png",
+      "source": {
+        "repo": "baranberkay96/waha-railway",
+        "rootDirectory": "/services/waha"
+      },
+      "startCommand": null,
+      "preDeployCommand": null,
+      "healthcheckPath": "/ping",
+      "healthcheckTimeout": 900,
+      "restartPolicyType": "ALWAYS",
+      "numReplicas": 1,
+      "cronSchedule": null,
+      "publicDomain": true,
+      "targetPort": 3000,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/app/data"
+      },
+      "variables": {
+        "PORT": {
+          "defaultValue": "3000",
+          "description": "HTTP port (public domain target and healthcheck).",
+          "required": true
+        },
+        "WAHA_API_KEY": {
+          "defaultValue": "${{secret(48, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "API key, generated at deploy. Send it as the X-Api-Key header; the dashboard asks for it too. 16-512 characters, no spaces (anything else locks the API).",
+          "required": true
+        },
+        "WAHA_DASHBOARD_USERNAME": {
+          "defaultValue": "admin",
+          "description": "Dashboard login user (/dashboard).",
+          "required": true
+        },
+        "WAHA_DASHBOARD_PASSWORD": {
+          "defaultValue": "${{secret(24, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\")}}",
+          "description": "Dashboard login password, generated at deploy (min. 12 characters).",
+          "required": true
+        },
+        "WHATSAPP_SWAGGER_USERNAME": {
+          "defaultValue": "admin",
+          "description": "Swagger UI login user (the API docs at /).",
+          "required": true
+        },
+        "WHATSAPP_SWAGGER_PASSWORD": {
+          "defaultValue": "${{WAHA_DASHBOARD_PASSWORD}}",
+          "description": "Swagger UI login password; same as the dashboard password by default (min. 12 characters).",
+          "required": true
+        },
+        "WAHA_DASHBOARD_ENABLED": {
+          "defaultValue": "True",
+          "description": "Serve the WAHA dashboard at /dashboard.",
+          "required": false
+        },
+        "WHATSAPP_SWAGGER_ENABLED": {
+          "defaultValue": "True",
+          "description": "Serve the Swagger API docs at /.",
+          "required": false
+        },
+        "WHATSAPP_DEFAULT_ENGINE": {
+          "defaultValue": "GOWS",
+          "description": "WhatsApp engine for new sessions: GOWS (lightweight, recommended), NOWEB, or WEBJS (runs a Chromium per session, much more RAM).",
+          "required": true
+        },
+        "WAHA_BASE_URL": {
+          "defaultValue": "https://${{RAILWAY_PUBLIC_DOMAIN}}",
+          "description": "Public URL used in media links sent to webhooks. Change it when you add a custom domain.",
+          "required": true
+        },
+        "WHATSAPP_SESSIONS_POSTGRESQL_URL": {
+          "defaultValue": "${{Postgres.DATABASE_URL}}?sslmode=disable",
+          "description": "Postgres for sessions, WhatsApp keys and app data (private network).",
+          "required": true
+        },
+        "WAHA_APPS_ENABLED": {
+          "defaultValue": "True",
+          "description": "Enable WAHA apps (Chatwoot integration, MCP and others); queue-based apps use Redis.",
+          "required": false
+        },
+        "REDIS_URL": {
+          "defaultValue": "${{Redis.REDIS_URL}}",
+          "description": "Redis for the apps job queue (private network).",
+          "required": false
+        },
+        "WAHA_MEDIA_STORAGE": {
+          "defaultValue": "LOCAL",
+          "description": "Where received media files are kept: LOCAL (volume) or POSTGRESQL.",
+          "required": false
+        },
+        "WAHA_MEDIA_POSTGRESQL_URL": {
+          "defaultValue": "${{Postgres.DATABASE_URL}}?sslmode=disable",
+          "description": "Postgres for media files when WAHA_MEDIA_STORAGE=POSTGRESQL.",
+          "required": false
+        },
+        "WHATSAPP_FILES_LIFETIME": {
+          "defaultValue": "180",
+          "description": "Seconds a received media file stays on the volume (0 = keep forever; watch the volume size).",
+          "required": false
+        },
+        "WHATSAPP_HOOK_URL": {
+          "defaultValue": "",
+          "description": "Optional. Global webhook URL that receives events of all sessions (e.g. an n8n webhook).",
+          "required": false
+        },
+        "WHATSAPP_HOOK_EVENTS": {
+          "defaultValue": "message,session.status",
+          "description": "Events sent to WHATSAPP_HOOK_URL, comma-separated ('*' = all).",
+          "required": false
+        },
+        "WAHA_CLIENT_DEVICE_NAME": {
+          "defaultValue": "WAHA",
+          "description": "Name shown under Linked devices on the phone.",
+          "required": false
+        },
+        "WAHA_PRINT_QR": {
+          "defaultValue": "False",
+          "description": "Print login QR codes in the logs (False: use the dashboard or API).",
+          "required": false
+        },
+        "WAHA_LOG_FORMAT": {
+          "defaultValue": "JSON",
+          "description": "Log format: JSON or PRETTY.",
+          "required": false
+        },
+        "WAHA_LOG_LEVEL": {
+          "defaultValue": "info",
+          "description": "Log level: error, warn, info or debug.",
+          "required": false
+        },
+        "TZ": {
+          "defaultValue": "UTC",
+          "description": "Time zone for logs and timestamps, e.g. Europe/Istanbul.",
+          "required": false
+        }
+      }
+    },
+    "Postgres": {
+      "icon": "https://devicons.railway.app/i/postgresql.svg",
+      "source": {
+        "image": "ghcr.io/railwayapp-templates/postgres-ssl:18"
+      },
+      "startCommand": null,
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/var/lib/postgresql/data"
+      },
+      "variables": {
+        "PGDATA": {
+          "defaultValue": "/var/lib/postgresql/data/pgdata",
+          "description": "Location where the database will be initialized",
+          "required": true
+        },
+        "PGHOST": {
+          "defaultValue": "${{RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Railway Private Domain Name.",
+          "required": true
+        },
+        "PGPORT": {
+          "defaultValue": "5432",
+          "description": "Port to connect to Postgres.",
+          "required": true
+        },
+        "PGUSER": {
+          "defaultValue": "${{ POSTGRES_USER }}",
+          "description": "Required variable for Data panel",
+          "required": true
+        },
+        "PGDATABASE": {
+          "defaultValue": "${{POSTGRES_DB}}",
+          "description": "Required variable for the data panel.",
+          "required": true
+        },
+        "PGPASSWORD": {
+          "defaultValue": "${{POSTGRES_PASSWORD}}",
+          "description": "Required variable for Data panel",
+          "required": true
+        },
+        "POSTGRES_DB": {
+          "defaultValue": "railway",
+          "description": "Default database created when image is started.",
+          "required": true
+        },
+        "DATABASE_URL": {
+          "defaultValue": "postgresql://${{PGUSER}}:${{POSTGRES_PASSWORD}}@${{RAILWAY_PRIVATE_DOMAIN}}:5432/${{PGDATABASE}}",
+          "description": "URL to connect to Postgres (private network).",
+          "required": true
+        },
+        "POSTGRES_USER": {
+          "defaultValue": "postgres",
+          "description": "User to connect to Postgres DB",
+          "required": true
+        },
+        "SSL_CERT_DAYS": {
+          "defaultValue": "820",
+          "description": "SSL certificate expiry in days.",
+          "required": false
+        },
+        "POSTGRES_PASSWORD": {
+          "defaultValue": "${{ secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") }}",
+          "description": "Password to connect to DB",
+          "required": true
+        },
+        "RAILWAY_DEPLOYMENT_DRAINING_SECONDS": {
+          "defaultValue": "60",
+          "description": "Allow Postgres to cleanly shut down",
+          "required": true
+        }
+      }
+    },
+    "Redis": {
+      "icon": "https://cdn.sanity.io/images/sy1jschh/production/0ce0bfdcfbdbf69662b1116671f97c2dd788b655-157x157.svg",
+      "source": {
+        "image": "redis:8.2.11@sha256:b0b01167ff47bc3868e56a967895a26be4230891a1f42a78ab61cdd227accc8d"
+      },
+      "startCommand": "/bin/sh -c \"rm -rf $RAILWAY_VOLUME_MOUNT_PATH/lost+found/ && exec docker-entrypoint.sh redis-server --requirepass $REDIS_PASSWORD --appendonly yes --appendfsync everysec --save 60 1 --dir $RAILWAY_VOLUME_MOUNT_PATH\"",
+      "healthcheckPath": null,
+      "healthcheckTimeout": null,
+      "restartPolicyType": "ALWAYS",
+      "publicDomain": false,
+      "targetPort": null,
+      "tcpProxy": null,
+      "volume": {
+        "mountPath": "/data"
+      },
+      "variables": {
+        "REDISHOST": {
+          "defaultValue": "${{RAILWAY_PRIVATE_DOMAIN}}",
+          "description": "Private network hostname of the Redis service, only resolvable from services in the same environment",
+          "required": true
+        },
+        "REDISPORT": {
+          "defaultValue": "6379",
+          "description": "Port that Redis listens on",
+          "required": true
+        },
+        "REDISUSER": {
+          "defaultValue": "default",
+          "description": "Username for authenticating with Redis",
+          "required": true
+        },
+        "REDIS_URL": {
+          "defaultValue": "redis://${{ REDISUSER }}:${{ REDIS_PASSWORD }}@${{ REDISHOST }}:${{ REDISPORT }}",
+          "description": "Connection string for connecting to Redis using the private network",
+          "required": true
+        },
+        "REDISPASSWORD": {
+          "defaultValue": "${{REDIS_PASSWORD}}",
+          "description": "Alias of REDIS_PASSWORD for clients that expect the unseparated name",
+          "required": true
+        },
+        "REDIS_PASSWORD": {
+          "defaultValue": "${{ secret(32, \"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\") }}",
+          "description": "Randomly generated password for authenticating with Redis",
+          "required": true
+        }
+      }
+    }
+  },
+  "buckets": []
+}
